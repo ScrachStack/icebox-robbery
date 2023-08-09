@@ -31,7 +31,6 @@ end)
 
 
 
-
 RegisterNetEvent("zaps:bankRobbery")
 AddEventHandler("zaps:bankRobbery", function(amount)
   local source = source
@@ -40,7 +39,7 @@ AddEventHandler("zaps:bankRobbery", function(amount)
     local Player = QBCore.Functions.GetPlayer(source)
     if Player.Functions.AddMoney('cash', amount) then
         Player.Functions.AddMoney('cash', amount)
-        exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
+        exports.ox_inventory:AddItem(source, Config.Framework.ItemName, Config.Framework.Amount, nil, nil, function()
         end)
     end
   elseif Config.Framework.FrameworkType == 'esx' then
@@ -48,8 +47,12 @@ AddEventHandler("zaps:bankRobbery", function(amount)
 
     if ESX.GetPlayerFromId(source) then
       xPlayer.addMoney(amount)
-      exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
+      if Config.Framework.UseOxInventory then
+      exports.ox_inventory:AddItem(source, Config.Framework.ItemName, Config.Framework.Amount, nil, nil, function()
       end)
+    else 
+      xPlayer.addInventoryItem(Config.Framework.ItemName, Config.Framework.Amount)
+    end
     else
       return
     end
@@ -59,7 +62,7 @@ AddEventHandler("zaps:bankRobbery", function(amount)
     NDCore.Functions.AddMoney(amount, source, "cash", "bank robbbery")
   end
   TriggerClientEvent("chatMessage", source, "You got $" .. amount .. " from the bank robbery!")
-  exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
+  exports.ox_inventory:AddItem(source, Config.Framework.ItemName, Config.Framework.Amount, nil, nil, function()
   end)
 end)
 
