@@ -7,7 +7,7 @@ Credits:
 
 Alv - Added ESX Support
 
-
-
-
+Requirements: 
+https://github.com/HalCroves/mythic_progbar
+https://github.com/CritteRo/fivem-scaleform-lib
 support: https:/discord.gg/cfxdev
