@@ -15,6 +15,7 @@ end
 
 
 Citizen.CreateThread(function()
+    -- Coordinates for the store
     local storeX = -1237.12
     local storeY = -802.53
     local storeZ = 17.84
@@ -69,8 +70,61 @@ end
 
 RegisterNetEvent('robberyInProgress')
 AddEventHandler('robberyInProgress', function()
+    -- Notify the player that a robbery is already in progress
     TriggerEvent('chatMessage', '^1Robbery in progress')
 end)
+
+
+--   -- Define the jewel cases' positions and rotations within the icebox MLO
+-- local jewelCases = {
+--     { x = -1238.66, y = -801.7, z = 17.84, heading = 130.62 }, -- Case 01
+--     { x = -1238.66, y = -801.7, z = 17.84, heading = 130.62 }, -- Case 01
+
+--     -- Add more jewel case positions here
+-- }
+
+-- -- Function to play the breaking glass animation for the player's ped
+-- function PlayBreakingGlassAnimation()
+--     local playerPed = PlayerPedId()
+--     RequestAnimDict("missheist_jewel@hacking")
+
+--     while not HasAnimDictLoaded("missheist_jewel@hacking") do
+--         Citizen.Wait(0)
+--     end
+
+--     TaskPlayAnim(playerPed, "missheist_jewel@hacking", "hacking_loop", 8.0, -8.0, -1, 49, 0, false, false, false)
+--     Citizen.Wait(5000) -- Adjust the duration of the animation as needed
+
+--     ClearPedTasks(playerPed)
+-- end
+
+-- -- Function to give the player a jewel item
+-- function GiveJewelItem()
+--     TriggerServerEvent('zaps:bankRobbery', 1000)
+-- end
+
+-- Citizen.CreateThread(function()
+--     while true do
+--         Citizen.Wait(0)
+--         local playerPed = PlayerPedId()
+--         local playerCoords = GetEntityCoords(playerPed)
+
+--         if IsRobbing then -- Check if the player is currently robbing
+--             for _, case in ipairs(jewelCases) do
+--                 local caseCoords = vector3(case.x, case.y, case.z)
+--                 local distance = #(playerCoords - caseCoords)
+
+--                 if distance < 2.0 then
+--                     DisplaySmashGlass()
+--                     if IsControlJustReleased(0, 38) then -- Check if the player pressed the "E" key
+--                         PlayBreakingGlassAnimation()
+--                         GiveJewelItem()
+--                     end
+--                 end
+--             end
+--         end
+--     end
+-- end)
 
 
 
@@ -93,29 +147,35 @@ function PlayBreakingGlassAnimation()
     end
 
     TaskPlayAnim(playerPed, "missheist_jewel@hacking", "hacking_loop", 8.0, -8.0, -1, 49, 0, false, false, false)
-    Citizen.Wait(5000)
+    Citizen.Wait(5000) -- Adjust the duration of the animation as needed
 
     ClearPedTasks(playerPed)
 end
 
-
+-- Function to give the player a jewel item
+-- function GiveJewelItem(index)
+--     local case = jewelCases[index]
+--     case.looted = true
+--     -- Trigger the server event to add the item and handle bank robbery
+--     TriggerServerEvent('zaps:bankRobbery', 1000)
+-- end
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
 
-        if IsRobbing then 
+        if IsRobbing then -- Check if the player is currently robbing
             local isAnyCaseAvailable = false
 
-            for index, case in ipairs(jewelCases) do
+            for index, case in ipairs(Config.Framework.JewelCases) do
                 local caseCoords = vector3(case.x, case.y, case.z)
                 local distance = #(playerCoords - caseCoords)
 
                 if distance < 1.5 then
-                    if not case.looted then 
+                    if not case.looted then -- Check if the case is not looted
                         DisplaySmashGlass()
-                        if IsControlJustReleased(0, 38) then -- E KEY
+                        if IsControlJustReleased(0, 38) then -- Check if the player pressed the "E" key
                             TriggerEvent("mythic_progbar:client:progress", {
                                 name = "unique_action_name",
                                 duration = 10000,
@@ -205,7 +265,9 @@ AddEventHandler('robberyFinished', function()
     IsRobbing = false
     isLooting = false
 
+    -- Add any additional reset logic or actions you need
     commandString = 'heist'
+    -- Print a message to the player indicating the robbery has finished
     TriggerEvent("chatMessage", "^1Robbery finished.")
     ExecuteCommand(
 	commandString
@@ -217,11 +279,13 @@ end)
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(1000) 
+        Citizen.Wait(1000) -- Check the player's distance every 1 second (adjust as needed)
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
 
         if IsRobbing and #(playerCoords - vector3(-1238.2, -802.29, 17.84)) > 50 then
+            -- The player has walked more than 10 units away from the robbery coordinates
+            -- Finish the robbery
             TriggerEvent('robberyFinished')
         end
     end
