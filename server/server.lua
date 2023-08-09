@@ -1,10 +1,4 @@
-if Config.Framework.FrameworkType == 'qb' then
-  local QBCore = exports['qb-core']:GetCoreObject()
-elseif Config.Framework.FrameworkType == 'esx' then
-  ESX = exports["es_extended"]:getSharedObject()
-elseif Config.Framework.FrameworkType == 'nd' then
-  NDCore = exports["ND_Core"]:GetCoreObject()
-end
+
 local isRobberyActive = false
 
 RegisterServerEvent('startRobbery')
@@ -41,11 +35,34 @@ end)
 RegisterNetEvent("zaps:bankRobbery")
 AddEventHandler("zaps:bankRobbery", function(amount)
   local source = source
-  NDCore.Functions.AddMoney(amount, source, "cash", "bank robbbery")
+  if Config.Framework.FrameworkType == 'qb' then
+    local QBCore = exports['qb-core']:GetCoreObject()
+    local Player = QBCore.Functions.GetPlayer(source)
+    if Player.Functions.AddMoney('cash', amount) then
+        Player.Functions.AddMoney('cash', amount)
+        exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
+        end)
+    end
+  elseif Config.Framework.FrameworkType == 'esx' then
+    ESX = exports["es_extended"]:getSharedObject()
+
+    if ESX.GetPlayerFromId(source) then
+      xPlayer.addMoney(amount)
+      exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
+      end)
+    else
+      return
+    end
+
+  elseif Config.Framework.FrameworkType == 'nd' then
+    NDCore = exports["ND_Core"]:GetCoreObject()
+    NDCore.Functions.AddMoney(amount, source, "cash", "bank robbbery")
+  end
   TriggerClientEvent("chatMessage", source, "You got $" .. amount .. " from the bank robbery!")
   exports.ox_inventory:AddItem(source, Config.Framework.ItemName, 1, nil, nil, function()
   end)
 end)
+
 
 
 function onload()
