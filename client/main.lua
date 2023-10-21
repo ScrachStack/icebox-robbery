@@ -1,6 +1,15 @@
 IsRobbing = false
 local blip = nil
 
+function CreateStoreBlip(x, y, z, sprite, color, name)
+    blip = AddBlipForCoord(x, y, z)
+    SetBlipSprite(blip, sprite)
+    SetBlipColour(blip, color)
+    SetBlipAsShortRange(blip, true)
+    BeginTextCommandSetBlipName("STRING")
+    AddTextComponentString(name)
+    EndTextCommandSetBlipName(blip)
+end
 
 
 Citizen.CreateThread(function()
@@ -24,7 +33,6 @@ function DisplaySmashGlass()
     AddTextComponentSubstringPlayerName("Press ~INPUT_CONTEXT~ to Break the case.")
     EndTextCommandDisplayHelp(0, false, true, -1)
 end
-
 
 function DisplayEmptyCaseNotification()
     BeginTextCommandDisplayHelp("STRING")
@@ -57,12 +65,6 @@ end)
 
 
 
-
-
-
-
-
-
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -77,9 +79,9 @@ Citizen.CreateThread(function()
                 local distance = #(playerCoords - caseCoords)
 
                 if distance < 1.5 then
-                    if not case.looted then -- Check if the case is not looted
+                    if not case.looted then 
                         DisplaySmashGlass()
-                        if IsControlJustReleased(0, 38) then -- Check if the player pressed the "E" key
+                        if IsControlJustReleased(0, 38) then
                             TriggerEvent("mythic_progbar:client:progress", {
                                 name = "unique_action_name",
                                 duration = 10000,
