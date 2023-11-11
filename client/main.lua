@@ -14,14 +14,8 @@ end
 
 Citizen.CreateThread(function()
     local storeBlipConfig = Config.Framework.StoreBlip
-
     CreateStoreBlip(storeBlipConfig.x, storeBlipConfig.y, storeBlipConfig.z, storeBlipConfig.sprite, storeBlipConfig.color, storeBlipConfig.name)
 end)
-
-
-local markerX = -1256.96
-local markerY = -812.98
-local markerZ = 17.84
 
 function DisplayRobNotification()
     BeginTextCommandDisplayHelp("STRING")
@@ -33,7 +27,6 @@ function DisplaySmashGlass()
     AddTextComponentSubstringPlayerName("Press ~INPUT_CONTEXT~ to Break the case.")
     EndTextCommandDisplayHelp(0, false, true, -1)
 end
-
 function DisplayEmptyCaseNotification()
     BeginTextCommandDisplayHelp("STRING")
     AddTextComponentSubstringPlayerName("Looted.")
@@ -44,7 +37,7 @@ end
        Citizen.Wait(0)
       local playerPed = PlayerPedId()
       local playerCoords = GetEntityCoords(playerPed)
-       local distance = #(playerCoords - vector3(markerX,markerY,markerZ))
+       local distance = #(playerCoords - vector3(Config.Framework.Marker.x,Config.Framework.Marker.y,Config.Framework.Marker.z))
       if distance < 5 then
          if not IsRobbing then  
          DisplayRobNotification()
@@ -59,25 +52,19 @@ end
 
 RegisterNetEvent('robberyInProgress')
 AddEventHandler('robberyInProgress', function()
-    -- Notify the player that a robbery is already in progress
     TriggerEvent('chatMessage', '^1Robbery in progress')
 end)
-
-
-
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
 
-        if IsRobbing then -- Check if the player is currently robbing
+        if IsRobbing then 
             local isAnyCaseAvailable = false
-
             for index, case in ipairs(Config.Framework.JewelCases) do
                 local caseCoords = vector3(case.x, case.y, case.z)
                 local distance = #(playerCoords - caseCoords)
-
                 if distance < 1.5 then
                     if not case.looted then 
                         DisplaySmashGlass()
@@ -113,24 +100,18 @@ Citizen.CreateThread(function()
             end
 
             if not isAnyCaseAvailable then
-                -- No more cases available for looting
-          --      DisplayEmptyCaseNotification()
             end
         end
     end
 end)
 
--- Function to give the player a jewel item
 function GiveJewelItem(index)
     local case = Config.Framework.JewelCases[index]
     case.looted = true
-
-    -- Trigger the server event to add the item and handle bank robbery
     TriggerServerEvent('zaps:bankRobbery', 1000)
 end
 
 RegisterCommand('heist', function()
-    --All 4 tables are required in order to proprer syncronize the scaleform.
     local _initialText = { --first slide. Consists of 3 text lines.
         missionTextLabel = "~y~ICEBOX HEIST~s~", 
         passFailTextLabel = "PASSED.",
@@ -167,16 +148,11 @@ end)
 
 RegisterNetEvent('robberyFinished')
 AddEventHandler('robberyFinished', function()
-    -- Reset the robbery state
     IsRobbing = false
     isLooting = false
-
-    -- Add any additional reset logic or actions you need
     commandString = 'heist'
     TriggerEvent("chatMessage", "^1Robbery finished.")
-    ExecuteCommand(
-	commandString
-)
+    ExecuteCommand(commandString)
 
 
 
@@ -184,7 +160,7 @@ end)
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(1000) -- Check the player's distance every 1 second (adjust as needed)
+        Citizen.Wait(1500)
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
 
